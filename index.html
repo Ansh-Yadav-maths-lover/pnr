@@ -1,0 +1,284 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PNR Status Lookup</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            font-family: 'Roboto', sans-serif;
+            color: #ffffff;
+        }
+        .container {
+            margin-top: 50px;
+            max-width: 900px;
+        }
+        .card {
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+        }
+        .btn-primary {
+            background: linear-gradient(to right, #007bff, #0056b3);
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 10px 20px;
+            color: #fff;
+            transition: all 0.3s;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(to right, #0056b3, #003d80);
+        }
+        .ticket {
+            border: 2px dashed #007bff;
+            border-radius: 10px;
+            padding: 20px;
+            background-color: #eef5ff;
+        }
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .ticket-header h4 {
+            color: #007bff;
+            font-weight: bold;
+        }
+        .ticket-details {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #333;
+        }
+        .ticket-details .info-item {
+            background: #f7f9fc;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            border-left: 4px solid #007bff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .ticket-details .info-item strong {
+            color: #007bff;
+            font-size: 16px;
+        }
+        .ticket-details .info-item span {
+            color: #333;
+            font-size: 14px;
+        }
+        .ticket-details .passenger-card {
+            border: 1px solid #007bff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #ffffff;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .ticket-details .passenger-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+        }
+        .ticket-details .passenger-card strong {
+            color: #007bff;
+        }
+        .badge {
+            font-size: 14px;
+            padding: 10px 15px;
+            border-radius: 15px;
+        }
+        .custom-footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #ffffff;
+            font-size: 14px;
+        }
+        .modal-content {
+            border-radius: 15px;
+        }
+        .modal-body p {
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center fw-bold">PNR Status Lookup</h1>
+        <p class="text-center">Enter your PNR number below to get detailed train information and updates.</p>
+        <div class="card">
+            <form id="pnrForm">
+                <div class="mb-3">
+                 <label for="pnrNumber" class="form-label" style="color: #111;"><strong>PNR Number</strong></label>
+                    <input type="text" class="form-control" id="pnrNumber" placeholder="Enter your 10-digit PNR number" maxlength="10" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Lookup</button>
+            </form>
+            <div id="loading" class="loading-spinner mt-4 text-center" style="display: none;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+            <div id="results" class="mt-4" style="display: none;">
+                <div class="ticket">
+                    <div class="ticket-header">
+                        <h4>PNR Details</h4>
+                        <span id="statusBadge" class="badge"></span>
+                    </div>
+                    <ul id="pnrDetails" class="list-unstyled ticket-details">
+                        <li class="info-item">
+                            <strong>PNR Number</strong> <span id="pnrNumberDisplay">2126942129</span>
+                        </li>
+                        <li class="info-item">
+                            <strong>Date of Journey</strong> <span id="dateOfJourney">Dec 22, 2024 6:32:08 PM</span>
+                        </li>
+                        <li class="info-item">
+                            <strong>Train Number</strong> <span id="trainNumber">22435</span>
+                        </li>
+                        <li class="info-item">
+                            <strong>Train Name</strong> <span id="trainName">VANDE BHARAT EX</span>
+                        </li>
+                        <li class="info-item">
+                            <strong>Source Station</strong> <span id="sourceStation">CNB</span>
+                        </li>
+                        <li class="info-item">
+                            <strong>Reservation Upto</strong> <span id="reservationUpto">NDLS</span>
+                        </li>
+                        <li class="info-item">
+                            <strong>Destination Station</strong> <span id="destinationStation">NDLS</span>
+                        </li>
+                        <li class="info-item">
+                            <strong>Journey Class</strong> <span id="journeyClass">CC</span>
+                        </li>
+                        <li class="info-item">
+                            <strong>Chart Status</strong> <span id="chartStatus">Chart Prepared</span>
+                        </li>
+                        <li class="info-item">
+                            <strong>Number of Passengers</strong> <span id="numberOfPassengers">1</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="custom-footer">
+        <p>Powered by Ansh | Stay updated on your journey!</p>
+    </div>
+
+    <!-- Passenger Details Modal -->
+    <div class="modal fade" id="passengerModal" tabindex="-1" aria-labelledby="passengerModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title" id="passengerModalLabel" style="color: black;">Passenger Details 🚅</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="modalPassengerDetails">Loading...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('pnrForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const pnrNumber = document.getElementById('pnrNumber').value.trim();
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            const pnrDetails = document.getElementById('pnrDetails');
+            const statusBadge = document.getElementById('statusBadge');
+
+            // Hide results and show the loading spinner
+            results.style.display = 'none';
+            loading.style.display = 'flex';
+
+            // Fetch the PNR details from the API
+            fetch(`https://irctc-indian-railway-pnr-status.p.rapidapi.com/getPNRStatus/${pnrNumber}`, {
+                method: 'GET',
+                headers: {
+                    'X-RapidAPI-Key': '619e04bcf8mshb7e3af68c582fd8p152ac4jsn9858c619677d',
+                    'X-RapidAPI-Host': 'irctc-indian-railway-pnr-status.p.rapidapi.com'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success === false) {
+                    pnrDetails.innerHTML = '<li>Invalid PNR Number. Please try again.</li>';
+                    statusBadge.textContent = 'FAILED';
+                    statusBadge.className = 'badge bg-danger';
+                } else if (data && data.data) {
+                    const pnrData = data.data;
+
+                    pnrDetails.innerHTML = `
+                        <li class="info-item"><strong>PNR Number:</strong> <span>${pnrData.pnrNumber || 'Not Available'}</span></li>
+                        <li class="info-item"><strong>Date of Journey:</strong> <span>${pnrData.dateOfJourney || 'Not Available'}</span></li>
+                        <li class="info-item"><strong>Train Number:</strong> <span>${pnrData.trainNumber || 'Not Available'}</span></li>
+                        <li class="info-item"><strong>Train Name:</strong> <span>${pnrData.trainName || 'Not Available'}</span></li>
+                        <li class="info-item"><strong>Source Station:</strong> <span>${pnrData.sourceStation || 'Not Available'}</span></li>
+                        <li class="info-item"><strong>Reservation Upto:</strong> <span>${pnrData.reservationUpto || 'Not Available'}</span></li>
+                        <li class="info-item"><strong>Destination Station:</strong> <span>${pnrData.destinationStation || 'Not Available'}</span></li>
+                        <li class="info-item"><strong>Journey Class:</strong> <span>${pnrData.journeyClass || 'Not Available'}</span></li>
+                        <li class="info-item"><strong>Chart Status:</strong> <span>${pnrData.chartStatus || 'Not Available'}</span></li>
+                        <li class="info-item"><strong>Number of Passengers:</strong> <span>${pnrData.numberOfpassenger || 'Not Available'}</span></li>
+                    `;
+
+                    if (pnrData.passengerList && pnrData.passengerList.length > 0) {
+                        pnrData.passengerList.forEach(passenger => {
+                            const passengerStatus = passenger.currentStatusDetails || 'Not Available';
+                            const passengerCard = document.createElement('div');
+                            passengerCard.className = 'passenger-card';
+                            passengerCard.innerHTML = `
+                                <p><strong>Passenger ${passenger.passengerSerialNumber}</strong></p>
+                                <p><strong>Booking Status:</strong> ${passenger.bookingStatusDetails || 'Not Available'}</p>
+                                <p><strong>Current Status:</strong> ${passengerStatus}</p>
+                            `;
+                            passengerCard.addEventListener('click', () => {
+                                document.getElementById('modalPassengerDetails').innerHTML = `
+                                    <p><strong>Person:</strong> ${passenger.passengerSerialNumber}</p>
+                                    <p><strong>Child Berth Flag:</strong> ${passenger.childBerthFlag}</p>
+                                    <p><strong>Current Status:</strong> ${passenger.currentStatus}</p>
+                                    <p><strong>Booking Berth No:</strong> ${passenger.bookingBerthNo}</p>
+                                `;
+                                new bootstrap.Modal(document.getElementById('passengerModal')).show();
+                            });
+                            pnrDetails.appendChild(passengerCard);
+                        });
+
+                        const hasConfirmed = pnrData.passengerList.some(passenger => passenger.currentStatusDetails && passenger.currentStatusDetails.includes('CNF'));
+
+                        if (hasConfirmed) {
+                            statusBadge.textContent = 'CONFIRMED';
+                            statusBadge.className = 'badge bg-success';
+                        } else {
+                            statusBadge.textContent = 'WAITING';
+                            statusBadge.className = 'badge bg-warning text-dark';
+                        }
+                    } else {
+                        pnrDetails.innerHTML += '<li>No passenger details available.</li>';
+                    }
+                } else {
+                    pnrDetails.innerHTML = '<li>No details found for the entered PNR.</li>';
+                }
+
+                loading.style.display = 'none';
+                results.style.display = 'block';
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                alert('Error fetching PNR details: ' + error.message);
+            });
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
